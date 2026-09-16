@@ -167,6 +167,7 @@ function applyTranslations() {
 
 // On Page Load
 document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
     applyTranslations();
     initWebSocket();
     loadMetrics();
@@ -179,6 +180,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh intervals
     setInterval(loadMetrics, 10000);
 });
+
+async function checkAuth() {
+    const token = localStorage.getItem('soc_token');
+    const userStr = localStorage.getItem('soc_user');
+    
+    if (!token) {
+        window.location.href = '/static/login.html';
+        return;
+    }
+    
+    if (userStr) {
+        try {
+            const u = JSON.parse(userStr);
+            const nameEl = document.getElementById('user-profile-name');
+            if (nameEl) nameEl.innerText = u.full_name || u.username || 'Admin';
+        } catch (e) {}
+    }
+}
+
+async function handleLogout() {
+    try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {}
+    localStorage.removeItem('soc_token');
+    localStorage.removeItem('soc_user');
+    window.location.href = '/static/login.html';
+}
 
 // WebSocket Initialization
 function initWebSocket() {

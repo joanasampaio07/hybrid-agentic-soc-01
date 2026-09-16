@@ -60,6 +60,14 @@
                 <button class="btn-cyber" onclick="toggleModal('settings-modal', true)">
                     <span data-i18n="settings">⚙️ Configurações</span>
                 </button>
+                <div style="display:flex; align-items:center; gap:8px; border-left:1px solid rgba(255,255,255,0.15); padding-left:12px;">
+                    <span style="font-size:0.8rem; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                        👤 <b id="user-profile-name">Admin</b>
+                    </span>
+                    <button class="btn-cyber btn-danger" style="padding:4px 10px; font-size:0.75rem;" onclick="handleLogout()">
+                        Sair
+                    </button>
+                </div>
             </div>
         </div>
     </header>

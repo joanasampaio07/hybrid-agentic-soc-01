@@ -11,6 +11,7 @@ from app.api.routes_alerts import router as alerts_router
 from app.api.routes_simulator import router as simulator_router
 from app.api.routes_containment import router as containment_router
 from app.api.routes_settings import router as settings_router
+from app.api.routes_auth import router as auth_router
 from app.api.websocket_manager import ws_manager
 
 # Initialize DB tables
@@ -32,6 +33,7 @@ app.add_middleware(
 )
 
 # API Routers
+app.include_router(auth_router)
 app.include_router(alerts_router)
 app.include_router(simulator_router)
 app.include_router(containment_router)
