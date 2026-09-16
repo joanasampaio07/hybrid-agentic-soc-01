@@ -1,0 +1,136 @@
+{
+  "name": "Hybrid Agentic SOC - Full Triaging & AI Investigation Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wazuh-alerts",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Wazuh Webhook Ingestion",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "dataType": "number",
+        "value1": "={{ $json.body.rule.level }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": 6,
+              "outputKey": "LOW"
+            },
+            {
+              "value2": 11,
+              "outputKey": "MEDIUM"
+            }
+          ]
+        },
+        "fallbackOutput": "HIGH"
+      },
+      "id": "2",
+      "name": "Rule Engine Switch (Low/Med/High)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "SOC_Audit_Trail",
+        "range": "A:F",
+        "options": {}
+      },
+      "id": "3",
+      "name": "Google Sheets (Auto-Closed Log)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [720, 160]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $env.EMAIL_ALERT_RECIPIENT }}",
+        "subject": "=[SOC Medium Alert] - Level {{ $json.body.rule.level }} - {{ $json.body.rule.description }}",
+        "text": "=Medium severity alert detected on {{ $json.body.agent.name }}.\nSource IP: {{ $json.body.data.srcip }}\nDetails: {{ $json.body.rule.description }}"
+      },
+      "id": "4",
+      "name": "Gmail Analyst Notification",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/ip_addresses/{{ $json.body.data.srcip }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "5",
+      "name": "VirusTotal Threat Intel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [720, 460]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.abuseipdb.com/api/v2/check?ipAddress={{ $json.body.data.srcip }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "6",
+      "name": "AbuseIPDB Threat Intel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [940, 460]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"mistral\",\n  \"prompt\": \"You are a Tier 3 SOC Analyst. Investigate alert: Level {{ $json.body.rule.level }} from IP {{ $json.body.data.srcip }}. VT detections: {{ $('VirusTotal Threat Intel').item.json.data.attributes.last_analysis_stats.malicious }}. Abuse score: {{ $('AbuseIPDB Threat Intel').item.json.data.abuseConfidenceScore }}%. Provide 1. Threat Summary 2. Risk Assessment 3. Containment Actions.\",\n  \"stream\": false\n}"
+      },
+      "id": "7",
+      "name": "Ollama Mistral 7B AI Investigation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1160, 460]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "SOC_AI_Investigations",
+        "range": "A:H"
+      },
+      "id": "8",
+      "name": "Google Sheets (AI SOC Report)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [1380, 460]
+    }
+  ],
+  "connections": {
+    "Wazuh Webhook Ingestion": {
+      "main": [[{"node": "Rule Engine Switch (Low/Med/High)", "type": "main", "index": 0}]]
+    },
+    "Rule Engine Switch (Low/Med/High)": {
+      "main": [
+        [{"node": "Google Sheets (Auto-Closed Log)", "type": "main", "index": 0}],
+        [{"node": "Gmail Analyst Notification", "type": "main", "index": 0}],
+        [{"node": "VirusTotal Threat Intel", "type": "main", "index": 0}]
+      ]
+    },
+    "VirusTotal Threat Intel": {
+      "main": [[{"node": "AbuseIPDB Threat Intel", "type": "main", "index": 0}]]
+    },
+    "AbuseIPDB Threat Intel": {
+      "main": [[{"node": "Ollama Mistral 7B AI Investigation", "type": "main", "index": 0}]]
+    },
+    "Ollama Mistral 7B AI Investigation": {
+      "main": [[{"node": "Google Sheets (AI SOC Report)", "type": "main", "index": 0}]]
+    }
+  }
+}

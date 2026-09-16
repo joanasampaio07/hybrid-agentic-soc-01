@@ -1,13 +1,15 @@
 # 🛡️ Enterprise Hybrid Agentic SOC — Rule Engine + AI Threat Investigation Platform
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![Wazuh](https://img.shields.io/badge/Wazuh-4.14-00A4E4.svg?style=for-the-badge&logo=wazuh&logoColor=white)](https://wazuh.com)
+[![n8n](https://img.shields.io/badge/n8n-Automation-EA4B71.svg?style=for-the-badge&logo=n8n&logoColor=white)](https://n8n.io)
+[![Grafana](https://img.shields.io/badge/Grafana-Monitoring-F46800.svg?style=for-the-badge&logo=grafana&logoColor=white)](https://grafana.com)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
 [![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT&CK-Covered-E05338.svg?style=for-the-badge)](https://attack.mitre.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> **A production-grade, cost-optimized Security Operations Center (SOC) orchestration platform.**  
-> Combines deterministic rule-based triage with autonomous Multi-Agent AI threat investigation, real-time threat intelligence enrichment, active containment playbooks, and an interactive Cyber Command Center Web UI.
+> **An end-to-end production Security Operations Center (SOC) platform.**  
+> Combines deterministic rule-based triage with autonomous Multi-Agent AI threat investigation, real-time threat intelligence enrichment, active containment playbooks, Wazuh SIEM integration, n8n workflow pipelines, Grafana telemetry, and an interactive Cyber Command Center Web UI.
 
 ---
 
@@ -21,7 +23,7 @@ Traditional Security Operations Centers suffer from severe **alert fatigue**: ov
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Architecture & Dual-Mode Deployment
 
 ```
                                ┌──────────────────────────────────────────────┐
@@ -43,11 +45,58 @@ Traditional Security Operations Centers suffer from severe **alert fatigue**: ov
                                                       │
               ┌───────────────────────────────────────┼───────────────────────────────────────┐
               ▼                                       ▼                                       ▼
-    Threat Intelligence Hub                  LLM Reasoning Hub                     Containment & Integrations
+    Threat Intelligence Hub                  LLM Reasoning Hub                     Containment & SIEM Hub
   - VirusTotal API (Detection Engine)      - Local Ollama (Mistral / Llama3)       - Automated Firewall / IP Drop
   - AbuseIPDB API (Reputation & ASN)       - Google Gemini / OpenAI                - Wazuh SIEM & Syslog Webhooks
-  - Tor Exit Node Correlator               - Free Offline Intelligent Mode         - Slack / Discord / Email Alerts
+  - Tor Exit Node Correlator               - Free Offline Intelligent Mode         - n8n Automation Workflows
+                                                                                   - Grafana Dashboards
 ```
+
+---
+
+## ⚙️ Complete Tech Stack
+
+| Component | Tool / Technology | Purpose |
+| :--- | :--- | :--- |
+| **SIEM & Log Collection** | Wazuh 4.14 | Host intrusion detection, FIM, Syscheck & log ingestion |
+| **Workflow Automation** | n8n (Self-Hosted) | Webhook triggers, switch nodes & notification pipelines |
+| **Admin Command Center** | HTML5 / CSS3 / Vanilla JS / WebSockets | Real-time SOC dashboard, live agent stream & MITRE matrix |
+| **Backend Core** | FastAPI / Python 3.11 / SQLite | High-performance deterministic rule engine & agent orchestrator |
+| **AI LLM Engines** | Ollama (Mistral 7B / Llama 3) & Gemini | Local private reasoning & threat report generation |
+| **Threat Intelligence** | VirusTotal & AbuseIPDB APIs | IOC scoring, reputation, ASN & Tor exit relay detection |
+| **Monitoring & Visuals** | Grafana | Executive SOC wallboard & alert breakdown |
+| **Wazuh Dashboard Plugin** | OpenSearch Dashboards (`wazuhAiSoc`) | Dedicated native sidebar tab inside Wazuh |
+| **Notifications** | Gmail / Slack / Discord | Medium severity analyst notifications & high-risk alerts |
+| **Infrastructure** | Docker / AWS EC2 | Turnkey containerized and cloud deployment |
+
+---
+
+## 📸 Screenshots & Architecture Gallery
+
+### 1. n8n Automation Workflow — Complete Rule & AI Pipeline
+![n8n Workflow](assets/screenshots/n8n.png)
+
+### 2. Wazuh SIEM Dashboard — Real Telemetry & Alerts
+![Wazuh Dashboard](assets/screenshots/wazuh-alert.png)
+
+### 3. Native Wazuh OpenSearch Dashboards Plugin (`wazuhAiSoc`)
+![Plugin Sidebar](assets/screenshots/ai-soc-sidebar-nav.png)
+![Plugin Data Table](assets/screenshots/ai-soc-plugin-tab.png)
+
+### 4. AI Threat Investigation Summary (High Risk Report)
+![AI Investigation](assets/screenshots/AI-summary.png)
+
+### 5. Multi-Dimensional Correlation Engine (IP Tracking)
+![Correlation](assets/screenshots/IP-correlation.png)
+
+### 6. Grafana Executive SOC Dashboard
+![Grafana](assets/screenshots/Grafana-dashboard.png)
+
+### 7. Google Sheets Automated Audit Trail
+![Google Sheets](assets/screenshots/Google-sheet.png)
+
+### 8. Analyst Email Notification (Medium Risk)
+![Gmail Alert](assets/screenshots/mail-alert.png)
 
 ---
 
@@ -87,7 +136,7 @@ Test and demo the entire pipeline with 1 click:
 
 ## 🛠️ Quickstart Guide
 
-### Option 1: Run Locally (Python 3.10+)
+### Option 1: Run Web Admin Command Center Locally (Python 3.10+)
 
 1. **Clone the repository**:
    ```bash
@@ -115,6 +164,23 @@ Test and demo the entire pipeline with 1 click:
 docker compose up -d
 ```
 The application will be live at `http://localhost:8000`.
+
+---
+
+### Option 3: Connect to Wazuh SIEM & n8n Pipeline
+
+1. **Wazuh Integration**:
+   - See [integrations/wazuh/README.md](integrations/wazuh/README.md) for configuring `custom-n8n` and `local_rules.xml`.
+   - Install the native plugin in `integrations/wazuh/wazuhAiSoc-plugin/`.
+
+2. **n8n Workflow**:
+   - Import `integrations/n8n/wazuh_ai_soc_workflow.json` into your n8n instance.
+
+3. **Grafana Dashboard**:
+   - Import `integrations/grafana/soc_dashboard.json` into Grafana.
+
+4. **Attack Simulator Script**:
+   - Run `python scripts/attack_simulation.py` on your target Linux agent to generate live alerts.
 
 ---
 
@@ -148,9 +214,24 @@ hybrid-agentic-soc/
 ├── frontend/
 │   ├── static/                # Cyber Dark SOC theme CSS and real-time JS
 │   └── index.html             # Single Page SOC Admin Command Center
+├── integrations/
+│   ├── wazuh/                 # Wazuh custom-n8n, local_rules.xml & OpenSearch plugin
+│   │   ├── custom-n8n
+│   │   ├── local_rules.xml
+│   │   └── wazuhAiSoc-plugin/
+│   ├── n8n/                   # Exportable n8n workflow JSON & guide
+│   │   └── wazuh_ai_soc_workflow.json
+│   └── grafana/               # Grafana dashboard JSON template
+│       └── soc_dashboard.json
+├── scripts/
+│   └── attack_simulation.py   # Multi-vector attack simulation script
+├── assets/
+│   └── screenshots/           # High-resolution screenshots of the original POC & dashboard
 ├── docs/
 │   ├── COMMERCIAL_PITCH.md    # B2B sales guide, pricing models, and client pitch
-│   └── LINKEDIN_KIT.md        # LinkedIn post templates, PDF carousel, and demo video script
+│   ├── LINKEDIN_KIT.md        # LinkedIn post templates, PDF carousel, and demo video script
+│   └── poc/
+│       └── Hybrid_Agentic_SOC_POC_v3.pdf  # Full Original POC Whitepaper
 ├── docker-compose.yml
 └── README.md
 ```
