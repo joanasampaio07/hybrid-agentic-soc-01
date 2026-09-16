@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.agents.threat_intel_agent import threat_intel_agent
 from app.agents.investigation_agent import investigation_agent
 from app.agents.containment_agent import containment_agent
+from app.integrations.communication_bot import communication_bot
 from app.api.websocket_manager import ws_manager
 
 router = APIRouter(prefix="/api/alerts", tags=["alerts"])
@@ -116,6 +117,12 @@ async def run_investigation_pipeline(alert_dict: Dict[str, Any]):
         "status": new_status
     }
     
+    # Dispatch multi-channel notifications (Telegram / WhatsApp / Email / Slack / Teams)
+    try:
+        await communication_bot.dispatch_alert_notifications(alert_dict, investigation_result)
+    except Exception as e:
+        print(f"[Notifications] Error dispatching alerts: {e}")
+        
     await ws_manager.broadcast("INVESTIGATION_COMPLETED", full_inv_data)
     await ws_manager.broadcast("METRICS_UPDATE", get_metrics_summary())
 

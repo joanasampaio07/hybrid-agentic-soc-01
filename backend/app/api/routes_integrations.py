@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Body
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Body, Request
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 import datetime
@@ -7,6 +7,8 @@ from app.integrations.wazuh_connector import wazuh_connector
 from app.integrations.microsoft_security_connector import microsoft_connector
 from app.integrations.sysmon_connector import sysmon_connector
 from app.integrations.iam_connector import iam_connector
+from app.integrations.fortinet_connector import fortinet_connector
+from app.integrations.communication_bot import communication_bot
 from app.api.routes_alerts import create_alert, AlertPayload
 from app.api.websocket_manager import ws_manager
 
@@ -17,8 +19,18 @@ class IAMActionRequest(BaseModel):
     action: str # "revoke_sessions" or "disable_account"
     provider: Optional[str] = "Microsoft Entra ID"
 
+class ChatCommandRequest(BaseModel):
+    command: str
+    sender: Optional[str] = "Web Console"
+
 class TestIntegrationRequest(BaseModel):
-    connector: str # "wazuh", "sentinel", "defender", "sysmon", "iam", "grafana"
+    connector: str # "wazuh", "sentinel", "defender", "sysmon", "iam", "fortinet", "telegram", "whatsapp"
+
+class FortiGateBanRequest(BaseModel):
+    target_ip: str
+    duration_seconds: Optional[int] = 86400
+    firewall_ip: Optional[str] = ""
+    api_token: Optional[str] = ""
 
 @router.get("/status")
 def get_integrations_status() -> Dict[str, Any]:
@@ -32,6 +44,14 @@ def get_integrations_status() -> Dict[str, Any]:
                 "status": "CONNECTED",
                 "webhook_url": "/api/integrations/wazuh/webhook",
                 "description": "Receives host intrusion alerts, FIM violations and syslog from Wazuh 4.14 agents."
+            },
+            {
+                "id": "fortinet",
+                "name": "Fortinet Security Fabric (FortiGate NGFW)",
+                "category": "Next-Gen Firewall / Perimeter",
+                "status": "ACTIVE",
+                "webhook_url": "/api/integrations/fortinet/webhook",
+                "description": "IPS attack logs, SSL-VPN anomaly feeds and automated FortiOS Banned IP quarantines."
             },
             {
                 "id": "microsoft_sentinel",
@@ -62,19 +82,23 @@ def get_integrations_status() -> Dict[str, Any]:
                 "name": "Microsoft Entra ID & IAM Directory",
                 "category": "Identity & Access Management",
                 "status": "ENABLED",
-                "webhook_url": "/api/integrations/iam/revoke",
+                "webhook_url": "/api/integrations/iam/action",
                 "description": "Automated user token revocation, account quarantine, and credential containment."
             },
             {
-                "id": "grafana",
-                "name": "Grafana Enterprise Telemetry",
-                "category": "Dashboards & Analytics",
-                "status": "CONFIGURED",
-                "webhook_url": "/integrations/grafana/soc_dashboard.json",
-                "description": "Live alert ingestion metrics, MITRE ATT&CK coverage charts, and executive reporting."
+                "id": "telegram_whatsapp_bot",
+                "name": "Telegram & WhatsApp AI SOC Bot",
+                "category": "Bidirectional ChatOps / Alerting",
+                "status": "READY",
+                "webhook_url": "/api/integrations/telegram/webhook",
+                "description": "Instant alert dispatch to phone + interactive commands (/block, /status, /investigate)."
             }
         ]
     }
+
+# =============================================================================
+# INGESTION ENDPOINTS
+# =============================================================================
 
 @router.post("/wazuh/webhook")
 async def ingest_wazuh_alert(payload: Dict[str, Any], background_tasks: BackgroundTasks):
@@ -82,6 +106,19 @@ async def ingest_wazuh_alert(payload: Dict[str, Any], background_tasks: Backgrou
     alert_payload = AlertPayload(**normalized)
     result = await create_alert(alert_payload, background_tasks)
     return {"success": True, "source": "Wazuh SIEM", "result": result}
+
+@router.post("/fortinet/webhook")
+async def ingest_fortinet_alert(payload: Dict[str, Any], background_tasks: BackgroundTasks):
+    normalized = fortinet_connector.parse_fortigate_log(payload)
+    alert_payload = AlertPayload(**normalized)
+    result = await create_alert(alert_payload, background_tasks)
+    return {"success": True, "source": "Fortinet Security Fabric (FortiGate)", "result": result}
+
+@router.post("/fortinet/ban-ip")
+async def execute_fortigate_ban(req: FortiGateBanRequest):
+    res = await fortinet_connector.ban_ip_on_fortigate(req.firewall_ip, req.api_token, req.target_ip, req.duration_seconds)
+    await ws_manager.broadcast("CONTAINMENT_ACTION", res)
+    return res
 
 @router.post("/microsoft/sentinel")
 async def ingest_sentinel_incident(payload: Dict[str, Any], background_tasks: BackgroundTasks):
@@ -114,6 +151,49 @@ async def execute_iam_action(request: IAMActionRequest):
     await ws_manager.broadcast("IAM_ACTION", res)
     return res
 
+# =============================================================================
+# CHATOPS & BIDIRECTIONAL BOT ENDPOINTS (Telegram / WhatsApp / Webhook)
+# =============================================================================
+
+@router.post("/telegram/webhook")
+async def telegram_webhook(payload: Dict[str, Any]):
+    """Receives webhook message from Telegram Bot and replies with AI agent response"""
+    message = payload.get("message", {})
+    text = message.get("text", "")
+    sender = message.get("from", {}).get("username", "Telegram User")
+    
+    # Check if callback query (inline button click)
+    callback_query = payload.get("callback_query", {})
+    if callback_query:
+        data = callback_query.get("data", "")
+        if data.startswith("block_"):
+            ip = data.split("_")[1]
+            reply = await communication_bot.process_incoming_command(f"/block {ip}", f"@{sender}")
+            return {"status": "ok", "reply": reply}
+            
+    reply = await communication_bot.process_incoming_command(text, f"@{sender}")
+    return {"status": "ok", "reply": reply}
+
+@router.post("/whatsapp/webhook")
+async def whatsapp_webhook(payload: Dict[str, Any]):
+    """Receives webhook from WhatsApp Business / Evolution API"""
+    data = payload.get("data", payload)
+    message_text = data.get("message", {}).get("conversation") or data.get("body") or ""
+    sender = data.get("key", {}).get("remoteJid", "WhatsApp Contact")
+    
+    reply = await communication_bot.process_incoming_command(message_text, f"WhatsApp ({sender})")
+    return {"status": "ok", "reply": reply}
+
+@router.post("/chat/command")
+async def execute_chat_command(req: ChatCommandRequest):
+    """Executes a chat command directly from the Web Admin Console"""
+    reply = await communication_bot.process_incoming_command(req.command, req.sender)
+    return {"command": req.command, "reply": reply}
+
+# =============================================================================
+# 1-CLICK TEST SIMULATOR FOR ALL CONNECTORS
+# =============================================================================
+
 @router.post("/test-trigger")
 async def test_integration_trigger(request: TestIntegrationRequest, background_tasks: BackgroundTasks):
     c = request.connector.lower()
@@ -126,6 +206,17 @@ async def test_integration_trigger(request: TestIntegrationRequest, background_t
             "data": {"srcip": "185.220.101.45", "dstip": "10.0.1.50"}
         }
         return await ingest_wazuh_alert(sample, background_tasks)
+        
+    elif c == "fortinet":
+        sample = {
+            "subtype": "ips",
+            "devname": "FG-CORP-PERIMETER-01",
+            "msg": "FortiGate IPS: Apache Struts OGNL Remote Code Execution Exploit Attempt",
+            "srcip": "87.152.6.217",
+            "dstip": "10.0.1.80",
+            "crscore": "high"
+        }
+        return await ingest_fortinet_alert(sample, background_tasks)
         
     elif c == "sentinel":
         sample = {
@@ -162,5 +253,17 @@ async def test_integration_trigger(request: TestIntegrationRequest, background_t
             action="revoke_sessions",
             provider="Microsoft Entra ID"
         ))
+        
+    elif c in ["telegram", "whatsapp"]:
+        res = await communication_bot.dispatch_alert_notifications({
+            "source_ip": "185.220.101.45",
+            "rule_level": 13,
+            "rule_description": "Alerta de Teste de Disparo Multicanal (Telegram / WhatsApp / Email)",
+            "agent_name": "prod-gateway-01",
+            "mitre_id": "T1110"
+        }, {
+            "ai_summary": "Simulação de notificação com botões interativos de contenção perimetral."
+        })
+        return {"success": True, "channel": c, "results": res}
         
     raise HTTPException(status_code=400, detail="Invalid connector type")

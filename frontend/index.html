@@ -252,6 +252,47 @@
 
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:18px;">
                 
+                <!-- Fortinet Security Fabric (FortiGate NGFW) -->
+                <div class="glass-panel" style="padding:20px; border-left:4px solid #ee3124;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                            🛡️ Fortinet Security Fabric (FortiGate NGFW)
+                        </div>
+                        <span class="pulse-badge badge-high" style="border-color:#ee3124; color:#f87171;">ATIVO</span>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                        Ingestão de logs FortiOS IPS/UTM, SSL-VPN e automação de <b>Banned IP Quarantine</b> via REST API.
+                    </p>
+                    <div style="background:#060911; padding:8px 12px; border-radius:6px; font-family:var(--font-mono); font-size:0.75rem; color:#38bdf8; margin-bottom:14px;">
+                        Webhook: <code>/api/integrations/fortinet/webhook</code>
+                    </div>
+                    <button class="btn-cyber btn-danger" style="width:100%; justify-content:center;" onclick="testIntegration('fortinet')">
+                        ⚡ Testar Alerta FortiGate IPS (RCE Drop)
+                    </button>
+                </div>
+
+                <!-- Telegram & WhatsApp ChatOps Bot -->
+                <div class="glass-panel" style="padding:20px; border-left:4px solid #25d366;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                            📱 Telegram & WhatsApp AI SOC Bot
+                        </div>
+                        <span class="pulse-badge badge-low" style="border-color:#25d366; color:#4ade80;">BIDIRECIONAL</span>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                        Disparo automático com botões interativos e <b>controle por chat</b> (<code>/block</code>, <code>/status</code>, <code>/investigate</code>).
+                    </p>
+                    <div style="display:flex; gap:8px; margin-bottom:10px;">
+                        <input type="text" id="chat-command-input" value="/investigate 185.220.101.45" class="input-field" style="padding:8px 10px; font-size:0.78rem; background:#060911;" placeholder="Ex: /block 1.2.3.4">
+                        <button class="btn-cyber" style="white-space:nowrap; font-size:0.78rem; border-color:#25d366; color:#4ade80;" onclick="testChatCommand()">
+                            Enviar Comando
+                        </button>
+                    </div>
+                    <button class="btn-cyber" style="width:100%; justify-content:center; font-size:0.75rem;" onclick="testIntegration('telegram')">
+                        📨 Testar Disparo de Alerta nos Apps
+                    </button>
+                </div>
+
                 <!-- Wazuh SIEM Card -->
                 <div class="glass-panel" style="padding:20px; border-left:4px solid #00a4e4;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">

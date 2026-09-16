@@ -667,6 +667,36 @@ async function testIamAction() {
     }
 }
 
+async function testChatCommand() {
+    const input = document.getElementById('chat-command-input');
+    const cmd = input ? input.value : '/status';
+    showToast(`📱 Enviando comando '${cmd}' para o Bot de IA...`, 'amber');
+    
+    try {
+        const res = await fetch('/api/integrations/chat/command', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ command: cmd, sender: 'Web Admin Console' })
+        });
+        const data = await res.json();
+        
+        // Show result in toast and terminal
+        showToast(`🤖 Resposta do Bot:\n${data.reply}`, 'cyan');
+        
+        const terminal = document.getElementById('agent-reasoning-terminal');
+        if (terminal) {
+            terminal.innerHTML += `
+            <div style="margin-top:10px; padding:10px; background:#060911; border-radius:6px; border:1px solid #25d366; color:#e2e8f0; font-family:var(--font-mono); font-size:0.8rem; white-space:pre-wrap;">
+[CHATOPS BOT] 💬 Resposta para '${cmd}':
+${data.reply}
+            </div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+    } catch (e) {
+        showToast(`❌ Erro no Bot: ${e}`, 'crimson');
+    }
+}
+
 // Helpers
 function getSeverityColor(level) {
     if (level >= 13) return '#ef4444';
