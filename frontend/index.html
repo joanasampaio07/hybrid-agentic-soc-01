@@ -150,6 +150,9 @@
             <button id="btn-tab-containment" class="nav-tab" onclick="switchTab('containment')">
                 <span data-i18n="tabContainment">🛡️ Contenção Ativa & Firewall</span>
             </button>
+            <button id="btn-tab-integrations" class="nav-tab" onclick="switchTab('integrations')">
+                <span data-i18n="tabIntegrations">🔌 Central de Integrações & SIEM/IAM</span>
+            </button>
         </nav>
 
         <!-- Tab 1: Live Operations -->
@@ -237,6 +240,132 @@
                         <!-- Containment rows injected here -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Tab 4: Integrations Hub -->
+        <div id="tab-integrations" class="tab-content" style="display:none;">
+            <div style="margin-bottom:16px;">
+                <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">🔌 Central de Conectores & Ecossistema de Cibersegurança</h2>
+                <p style="font-size:0.8rem; color:var(--text-muted);">Conecte este SOC ao Wazuh, Microsoft Sentinel/Defender, Sysmon, IAM Entra ID, Grafana e Webhooks corporativos.</p>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:18px;">
+                
+                <!-- Wazuh SIEM Card -->
+                <div class="glass-panel" style="padding:20px; border-left:4px solid #00a4e4;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                            🛡️ Wazuh SIEM & HIDS
+                        </div>
+                        <span class="pulse-badge badge-low">CONECTADO</span>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                        Recepção de telemetria de agentes Linux/Windows, violações FIM no <code>/etc/passwd</code> e correlação de eventos.
+                    </p>
+                    <div style="background:#060911; padding:8px 12px; border-radius:6px; font-family:var(--font-mono); font-size:0.75rem; color:#38bdf8; margin-bottom:14px;">
+                        Webhook: <code>/api/integrations/wazuh/webhook</code>
+                    </div>
+                    <button class="btn-cyber" style="width:100%; justify-content:center;" onclick="testIntegration('wazuh')">
+                        ⚡ Testar Disparo de Evento Wazuh
+                    </button>
+                </div>
+
+                <!-- Microsoft Sentinel Card -->
+                <div class="glass-panel" style="padding:20px; border-left:4px solid #0078d4;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                            ☁️ Microsoft Sentinel (SIEM/SOAR)
+                        </div>
+                        <span class="pulse-badge badge-low">ATIVO</span>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                        Ingestão de incidentes em nuvem do Azure, Microsoft Graph Security e alertas correlacionados.
+                    </p>
+                    <div style="background:#060911; padding:8px 12px; border-radius:6px; font-family:var(--font-mono); font-size:0.75rem; color:#38bdf8; margin-bottom:14px;">
+                        Webhook: <code>/api/integrations/microsoft/sentinel</code>
+                    </div>
+                    <button class="btn-cyber" style="width:100%; justify-content:center; border-color:#0078d4; color:#60a5fa;" onclick="testIntegration('sentinel')">
+                        ⚡ Testar Incidente Microsoft Sentinel
+                    </button>
+                </div>
+
+                <!-- Microsoft Defender for Endpoint (XDR) -->
+                <div class="glass-panel" style="padding:20px; border-left:4px solid #2563eb;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                            💻 Microsoft Defender for Endpoint (MDE/XDR)
+                        </div>
+                        <span class="pulse-badge badge-low">ATIVO</span>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                        Detecções de malware, árvore de processos PowerShell e playbook de isolamento de máquina.
+                    </p>
+                    <div style="background:#060911; padding:8px 12px; border-radius:6px; font-family:var(--font-mono); font-size:0.75rem; color:#38bdf8; margin-bottom:14px;">
+                        Webhook: <code>/api/integrations/microsoft/defender</code>
+                    </div>
+                    <button class="btn-cyber" style="width:100%; justify-content:center; border-color:#2563eb; color:#93c5fd;" onclick="testIntegration('defender')">
+                        ⚡ Testar Alerta Defender XDR
+                    </button>
+                </div>
+
+                <!-- Windows Sysmon Card -->
+                <div class="glass-panel" style="padding:20px; border-left:4px solid #10b981;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                            ⚙️ Windows Sysmon & Winlogbeat
+                        </div>
+                        <span class="pulse-badge badge-low">PRONTO</span>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                        Ingestão direta de Event ID 1 (Process Creation), ID 3 (Network C2) e ID 11 (File Drops).
+                    </p>
+                    <div style="background:#060911; padding:8px 12px; border-radius:6px; font-family:var(--font-mono); font-size:0.75rem; color:#38bdf8; margin-bottom:14px;">
+                        Endpoint: <code>/api/integrations/sysmon/event</code>
+                    </div>
+                    <button class="btn-cyber btn-success" style="width:100%; justify-content:center;" onclick="testIntegration('sysmon')">
+                        ⚡ Testar Evento Sysmon (ID 1 C2)
+                    </button>
+                </div>
+
+                <!-- IAM & Microsoft Entra ID Card -->
+                <div class="glass-panel" style="padding:20px; border-left:4px solid #a855f7;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                            🔑 IAM & Microsoft Entra ID / Okta
+                        </div>
+                        <span class="pulse-badge badge-critical">HABILITADO</span>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                        Playbook de contenção de credenciais: revogação de tokens de sessão e bloqueio de usuários de risco.
+                    </p>
+                    <div style="display:flex; gap:8px; margin-bottom:10px;">
+                        <input type="text" id="iam-target-user" value="usuario.suspeito@empresa.com.br" class="input-field" style="padding:8px 10px; font-size:0.78rem; background:#060911;">
+                        <button class="btn-cyber btn-danger" style="white-space:nowrap; font-size:0.78rem;" onclick="testIamAction()">
+                            Revogar Sessões
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grafana & Telemetry Card -->
+                <div class="glass-panel" style="padding:20px; border-left:4px solid #f59e0b;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                            📊 Grafana SOC Dashboard
+                        </div>
+                        <span class="pulse-badge badge-medium">CONFIGURADO</span>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                        Exportação em tempo real de métricas executivas, tempo de resposta MTTR e matriz MITRE.
+                    </p>
+                    <div style="background:#060911; padding:8px 12px; border-radius:6px; font-family:var(--font-mono); font-size:0.75rem; color:#38bdf8; margin-bottom:14px;">
+                        Template: <code>integrations/grafana/soc_dashboard.json</code>
+                    </div>
+                    <a href="/integrations/grafana/soc_dashboard.json" target="_blank" class="btn-cyber" style="width:100%; justify-content:center; text-decoration:none; border-color:#f59e0b; color:#f59e0b;">
+                        📄 Visualizar Template do Grafana
+                    </a>
+                </div>
+
             </div>
         </div>
 

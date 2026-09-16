@@ -33,6 +33,7 @@ const I18N = {
         tabOps: "🚨 Operações do SOC ao Vivo",
         tabMitre: "📊 Matriz MITRE ATT&CK",
         tabContainment: "🛡️ Contenção Ativa & Firewall",
+        tabIntegrations: "🔌 Central de Integrações & SIEM/IAM",
         telemetryStream: "📡 Fluxo de Telemetria & Alertas ao Vivo",
         refresh: "↻ Atualizar",
         aiReasoningStream: "🧠 Orquestrador & Raciocínio da IA em Tempo Real",
@@ -99,6 +100,7 @@ const I18N = {
         tabOps: "🚨 Live SOC Operations",
         tabMitre: "📊 MITRE ATT&CK Matrix",
         tabContainment: "🛡️ Active Containment & Firewall",
+        tabIntegrations: "🔌 Integrations & SIEM/IAM Hub",
         telemetryStream: "📡 Live Telemetry & Alert Stream",
         refresh: "↻ Refresh",
         aiReasoningStream: "🧠 AI Agent Orchestrator & Reasoning Stream",
@@ -615,6 +617,54 @@ function toggleModal(modalId, show) {
 function toggleLanguage() {
     const newLang = currentLang === 'pt' ? 'en' : 'pt';
     setLanguage(newLang);
+}
+
+async function testIntegration(connector) {
+    showToast(`🔌 Disparando evento de teste para ${connector.toUpperCase()}...`, 'amber');
+    
+    // Switch to operations tab to watch the AI stream
+    switchTab('operations');
+    
+    const terminal = document.getElementById('agent-reasoning-terminal');
+    if (terminal) {
+        terminal.innerHTML = `
+        <div style="color:var(--accent-amber); font-weight:600; margin-bottom:8px;">
+            [INTEGRATION CONNECTOR] 🚀 Ingesting telemetry event from '${connector.toUpperCase()}'...
+        </div>`;
+    }
+    
+    try {
+        const res = await fetch('/api/integrations/test-trigger', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ connector: connector })
+        });
+        const data = await res.json();
+        showToast(`✅ Evento ingerido via ${connector.toUpperCase()}!`, 'emerald');
+    } catch (e) {
+        showToast(`❌ Erro no conector: ${e}`, 'crimson');
+    }
+}
+
+async function testIamAction() {
+    const user = document.getElementById('iam-target-user').value || 'usuario.suspeito@empresa.com.br';
+    showToast(`🔑 Disparando revogação de sessões para ${user}...`, 'amber');
+    
+    try {
+        const res = await fetch('/api/integrations/iam/action', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                user_principal_name: user,
+                action: 'revoke_sessions',
+                provider: 'Microsoft Entra ID'
+            })
+        });
+        const data = await res.json();
+        showToast(`✅ Sessões de ${user} revogadas no Microsoft Entra ID!`, 'emerald');
+    } catch (e) {
+        showToast(`❌ Erro no IAM: ${e}`, 'crimson');
+    }
 }
 
 // Helpers

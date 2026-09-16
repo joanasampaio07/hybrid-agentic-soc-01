@@ -12,6 +12,7 @@ from app.api.routes_simulator import router as simulator_router
 from app.api.routes_containment import router as containment_router
 from app.api.routes_settings import router as settings_router
 from app.api.routes_auth import router as auth_router
+from app.api.routes_integrations import router as integrations_router
 from app.api.websocket_manager import ws_manager
 
 # Initialize DB tables
@@ -38,6 +39,7 @@ app.include_router(alerts_router)
 app.include_router(simulator_router)
 app.include_router(containment_router)
 app.include_router(settings_router)
+app.include_router(integrations_router)
 
 # WebSocket Endpoint
 @app.websocket("/ws")
