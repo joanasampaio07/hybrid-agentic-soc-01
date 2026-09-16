@@ -1,11 +1,173 @@
-// SOC Admin Command Center - Frontend Logic
+// SOC Admin Command Center - Frontend Logic with i18n (PT-BR / EN)
 
 let ws = null;
 let activeTab = 'operations';
-let selectedInvestigation = null;
+let currentLang = localStorage.getItem('soc_lang') || 'pt';
+
+const I18N = {
+    pt: {
+        subtitle: "Motor de Regras Determinístico + Núcleo de Investigação Autônomo com IA",
+        orchestratorLive: "ORQUESTRADOR ONLINE",
+        reconnecting: "RECONECTANDO...",
+        aiEngine: "MOTOR DE IA",
+        settings: "⚙️ Configurações",
+        metricTotal: "Total de Alertas Ingeridos",
+        metricTotalSub: "Fluxo SIEM & Syslog",
+        metricLow: "Baixo Risco Auto-Triado (90%)",
+        metricLowSub: "Auto-fechado / 0 Fadiga de Alertas",
+        metricHigh: "Alto Risco Investigado por IA (10%)",
+        metricHighSub: "Análise Profunda Multi-Agente",
+        metricMttr: "Tempo Médio de Resposta (MTTR)",
+        metricMttrSub: "vs 35 min da média humana",
+        metricBlocks: "Bloqueios Ativos de Firewall",
+        metricBlocksSub: "Automatizado / Aprovado por Analista",
+        metricSavings: "Economia de Custos Estimada",
+        metricSavingsSub: "Horas de analista automatizadas",
+        simTitle: "⚡ Simulador de Ataques 1-Clique (Modo Demo)",
+        simSub: "Dispare telemetria real do MITRE ATT&CK para testar e demonstrar o fluxo agêntico ao vivo.",
+        btnSsh: "🔥 T1110 Força Bruta SSH",
+        btnSudo: "👤 T1136 Usuário Sudo Indevido",
+        btnSqli: "🌐 T1190 Exploit Web SQLi",
+        btnRansom: "⚠️ T1486 Ransomware FIM",
+        btnScan: "🔍 T1046 Varredura de Portas (Baixo)",
+        tabOps: "🚨 Operações do SOC ao Vivo",
+        tabMitre: "📊 Matriz MITRE ATT&CK",
+        tabContainment: "🛡️ Contenção Ativa & Firewall",
+        telemetryStream: "📡 Fluxo de Telemetria & Alertas ao Vivo",
+        refresh: "↻ Atualizar",
+        aiReasoningStream: "🧠 Orquestrador & Raciocínio da IA em Tempo Real",
+        realtimeTelemetry: "Telemetria em Tempo Real",
+        aiInitMessage: "[SISTEMA] Orquestrador de Agentes Autônomos inicializado. Aguardando telemetria...",
+        aiInitSub: "Clique em qualquer botão de simulação acima para ver a IA triando e investigando ao vivo.",
+        selectAlertPlaceholder: "Selecione um alerta investigado ou dispare uma simulação para inspecionar o relatório gerado.",
+        mitreTitle: "Mapa de Calor de Cobertura de Detecção MITRE ATT&CK®",
+        mitreSub: "Mapeamento das regras de detecção ativas do SIEM e playbooks de contenção autônoma por tática adversária.",
+        containmentTitle: "🛡️ Firewall Perimetral & Ações de Contenção",
+        containmentSub: "Bloqueios ativos, isolamento de hosts e log de auditoria Human-in-the-Loop.",
+        colIp: "IP Alvo",
+        colStatus: "Status",
+        colReason: "Motivo",
+        colBy: "Executado Por",
+        colTime: "Horário",
+        colAction: "Ação",
+        btnUnblock: "Desbloquear",
+        revoked: "Revogado",
+        btnBlockIp: "🚫 Bloquear IP (Firewall Drop)",
+        vtScore: "Score VirusTotal",
+        abuseScore: "Score AbuseIPDB",
+        geoOrigin: "Origem Geográfica",
+        torExit: "Nó de Saída Tor",
+        investigationTitle: "🛡️ Relatório de Investigação de Ameaça por IA",
+        modalTitle: "⚙️ Configurações do SOC & Provedores de IA",
+        lblProvider: "Motor de Raciocínio LLM",
+        lblGemini: "Chave de API do Gemini (Opcional)",
+        lblVt: "Chave de API do VirusTotal (Opcional)",
+        lblAbuse: "Chave de API do AbuseIPDB (Opcional)",
+        lblAuto: "Habilitar Contenção Autônoma (Auto-bloquear IPs Críticos)",
+        btnCancel: "Cancelar",
+        btnSave: "Salvar Configurações",
+        toastFired: "⚡ Disparando cenário de ataque:",
+        toastInvComplete: "🧠 Investigação de IA Concluída:",
+        toastBlocked: "✅ IP bloqueado com sucesso no Firewall e AWS SG!",
+        toastSaved: "✅ Configurações salvas com sucesso!"
+    },
+    en: {
+        subtitle: "Deterministic Rule Engine + Autonomous AI Investigation Core",
+        orchestratorLive: "ORCHESTRATOR LIVE",
+        reconnecting: "RECONNECTING...",
+        aiEngine: "AI ENGINE",
+        settings: "⚙️ Settings",
+        metricTotal: "Total Ingested Alerts",
+        metricTotalSub: "SIEM & Syslog stream",
+        metricLow: "Low Auto-Triaged (90%)",
+        metricLowSub: "Auto-closed / 0 Analyst Fatigue",
+        metricHigh: "High AI Investigated (10%)",
+        metricHighSub: "Deep Multi-Agent Analysis",
+        metricMttr: "Mean Time to Triage (MTTR)",
+        metricMttrSub: "vs 35 min human average",
+        metricBlocks: "Active Firewall Blocks",
+        metricBlocksSub: "Automated / Analyst approved",
+        metricSavings: "Estimated Cost Savings",
+        metricSavingsSub: "SOC Analyst hours automated",
+        simTitle: "⚡ 1-Click Live Attack Simulator (Demo Mode)",
+        simSub: "Trigger realistic MITRE ATT&CK telemetry to test and demonstrate the autonomous agent workflow in real-time.",
+        btnSsh: "🔥 T1110 SSH Brute Force",
+        btnSudo: "👤 T1136 Rogue Sudo User",
+        btnSqli: "🌐 T1190 Web SQLi Exploit",
+        btnRansom: "⚠️ T1486 Ransomware FIM",
+        btnScan: "🔍 T1046 Port Scan (Low)",
+        tabOps: "🚨 Live SOC Operations",
+        tabMitre: "📊 MITRE ATT&CK Matrix",
+        tabContainment: "🛡️ Active Containment & Firewall",
+        telemetryStream: "📡 Live Telemetry & Alert Stream",
+        refresh: "↻ Refresh",
+        aiReasoningStream: "🧠 AI Agent Orchestrator & Reasoning Stream",
+        realtimeTelemetry: "Real-time Telemetry",
+        aiInitMessage: "[SYSTEM] Autonomous Agent Orchestrator initialized. Waiting for incoming telemetry...",
+        aiInitSub: "Click any simulation button above to watch the agent triage and investigate in real-time.",
+        selectAlertPlaceholder: "Select an investigated alert or trigger a simulation to inspect the generated report.",
+        mitreTitle: "MITRE ATT&CK® Detection Coverage Heatmap",
+        mitreSub: "Mapping active SIEM detection rules and autonomous containment playbooks across adversary tactics.",
+        containmentTitle: "🛡️ Perimeter Firewall & Containment Actions",
+        containmentSub: "Active drops, host isolation, and human-in-the-loop audit log.",
+        colIp: "Target IP",
+        colStatus: "Status",
+        colReason: "Reason",
+        colBy: "Executed By",
+        colTime: "Timestamp",
+        colAction: "Action",
+        btnUnblock: "Unblock",
+        revoked: "Revoked",
+        btnBlockIp: "🚫 Block IP (Firewall Drop)",
+        vtScore: "VirusTotal Score",
+        abuseScore: "AbuseIPDB Score",
+        geoOrigin: "Geo Origin",
+        torExit: "Tor Exit Node",
+        investigationTitle: "🛡️ AI Threat Investigation Report",
+        modalTitle: "⚙️ SOC Settings & AI Provider",
+        lblProvider: "LLM Reasoning Engine",
+        lblGemini: "Gemini API Key (Optional)",
+        lblVt: "VirusTotal API Key (Optional)",
+        lblAbuse: "AbuseIPDB API Key (Optional)",
+        lblAuto: "Enable Autonomous Containment (Auto-Block Critical IPs)",
+        btnCancel: "Cancel",
+        btnSave: "Save Configuration",
+        toastFired: "⚡ Firing attack scenario:",
+        toastInvComplete: "🧠 AI Investigation Complete:",
+        toastBlocked: "✅ IP successfully blocked in Firewall & AWS SG!",
+        toastSaved: "✅ Settings saved successfully!"
+    }
+};
+
+function t(key) {
+    return (I18N[currentLang] && I18N[currentLang][key]) || key;
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('soc_lang', lang);
+    applyTranslations();
+    loadAlerts();
+    loadInvestigations();
+    loadContainmentBlocks();
+}
+
+function applyTranslations() {
+    const dict = I18N[currentLang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (dict[k]) el.innerText = dict[k];
+    });
+    
+    const langBtn = document.getElementById('btn-lang-toggle');
+    if (langBtn) {
+        langBtn.innerText = currentLang === 'pt' ? '🇧🇷 PT-BR' : '🇺🇸 EN';
+    }
+}
 
 // On Page Load
 document.addEventListener('DOMContentLoaded', () => {
+    applyTranslations();
     initWebSocket();
     loadMetrics();
     loadAlerts();
@@ -29,7 +191,7 @@ function initWebSocket() {
         ws.onopen = () => {
             const el = document.getElementById('ws-status');
             if (el) {
-                el.innerHTML = '<span class="pulse-dot" style="background:#10b981;"></span> LIVE AGENT ORCHESTRATOR CONNECTED';
+                el.innerHTML = `<span class="pulse-dot" style="background:#10b981;"></span> ${t('orchestratorLive')}`;
                 el.className = 'pulse-badge badge-low';
             }
         };
@@ -46,7 +208,7 @@ function initWebSocket() {
         ws.onclose = () => {
             const el = document.getElementById('ws-status');
             if (el) {
-                el.innerHTML = '<span class="pulse-dot" style="background:#ef4444;"></span> RECONNECTING...';
+                el.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> ${t('reconnecting')}`;
                 el.className = 'pulse-badge badge-high';
             }
             setTimeout(initWebSocket, 3000);
@@ -62,14 +224,14 @@ function handleWsEvent(msg) {
     
     if (type === 'NEW_ALERT') {
         prependAlertToFeed(data);
-        showToast(`🚨 New Alert: ${data.rule_description.substring(0, 45)}...`, data.rule_level >= 12 ? 'crimson' : 'cyan');
+        showToast(`🚨 Alerta: ${data.rule_description.substring(0, 45)}...`, data.rule_level >= 12 ? 'crimson' : 'cyan');
     } else if (type === 'AGENT_STEP') {
         renderAgentStep(data);
     } else if (type === 'INVESTIGATION_COMPLETED') {
         renderCompletedInvestigation(data);
         loadAlerts();
         loadContainmentBlocks();
-        showToast(`🧠 AI Investigation Complete: ${data.alert.source_ip}`, 'emerald');
+        showToast(`${t('toastInvComplete')} ${data.alert.source_ip}`, 'emerald');
     } else if (type === 'METRICS_UPDATE') {
         updateMetricsUI(data);
     } else if (type === 'CONTAINMENT_ACTION') {
@@ -129,13 +291,15 @@ async function loadAlerts() {
 
 function generateAlertCardHTML(a) {
     let badgeClass = 'badge-low';
-    let tierText = 'LOW (AUTO-CLOSED)';
+    let tierText = currentLang === 'pt' ? 'BAIXO (AUTO-FECHADO)' : 'LOW (AUTO-CLOSED)';
     if (a.rule_level >= 12) {
         badgeClass = a.status === 'CONTAINED' ? 'badge-critical' : 'badge-high';
-        tierText = a.status === 'CONTAINED' ? 'HIGH (CONTAINED)' : 'HIGH (AI INVESTIGATED)';
+        tierText = a.status === 'CONTAINED' 
+            ? (currentLang === 'pt' ? 'ALTO (CONTIDO)' : 'HIGH (CONTAINED)')
+            : (currentLang === 'pt' ? 'ALTO (INVESTIGADO POR IA)' : 'HIGH (AI INVESTIGATED)');
     } else if (a.rule_level >= 7) {
         badgeClass = 'badge-medium';
-        tierText = 'MEDIUM (NOTIFIED)';
+        tierText = currentLang === 'pt' ? 'MÉDIO (NOTIFICADO)' : 'MEDIUM (NOTIFIED)';
     }
     
     return `
@@ -146,8 +310,8 @@ function generateAlertCardHTML(a) {
         </div>
         <div style="font-weight:600; font-size:0.92rem; margin-bottom:6px; color:var(--text-main);">${escapeHtml(a.rule_description)}</div>
         <div style="display:flex; gap:12px; font-size:0.78rem; font-family:var(--font-mono); color:var(--text-muted);">
-            <span>Target: <b style="color:#e2e8f0;">${a.agent_name || 'host'}</b></span>
-            <span>Src IP: <b style="color:#38bdf8;">${a.source_ip}</b></span>
+            <span>Alvo: <b style="color:#e2e8f0;">${a.agent_name || 'host'}</b></span>
+            <span>IP Origem: <b style="color:#38bdf8;">${a.source_ip}</b></span>
             <span>MITRE: <b style="color:#a855f7;">${a.mitre_id || 'N/A'}</b></span>
         </div>
     </div>
@@ -163,26 +327,24 @@ function prependAlertToFeed(a) {
 
 // 1-Click Trigger Scenario
 async function triggerAttack(scenarioKey) {
-    showToast(`⚡ Firing attack scenario: ${scenarioKey}...`, 'amber');
+    showToast(`${t('toastFired')} ${scenarioKey}...`, 'amber');
     
-    // Clear live reasoning terminal to show step-by-step processing
     const terminal = document.getElementById('agent-reasoning-terminal');
     if (terminal) {
         terminal.innerHTML = `
         <div style="color:var(--accent-amber); font-weight:600; margin-bottom:8px;">
-            [ORCHESTRATOR] 🎯 Dispatching telemetry event for '${scenarioKey}'...
+            [ORCHESTRATOR] 🎯 Disparando telemetria para '${scenarioKey}'...
         </div>`;
     }
     
     try {
-        const res = await fetch('/api/simulator/trigger', {
+        await fetch('/api/simulator/trigger', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ scenario: scenarioKey })
         });
-        const data = await res.json();
     } catch (e) {
-        showToast(`❌ Error triggering scenario: ${e}`, 'crimson');
+        showToast(`❌ Erro: ${e}`, 'crimson');
     }
 }
 
@@ -193,7 +355,7 @@ function renderAgentStep(stepData) {
     
     const stepHtml = `
     <div style="margin-bottom: 8px; border-bottom: 1px dashed rgba(56, 189, 248, 0.2); padding-bottom: 6px;">
-        <span style="color:#38bdf8; font-weight:700;">[STEP ${stepData.step}] ${stepData.name}</span>
+        <span style="color:#38bdf8; font-weight:700;">[PASSO ${stepData.step}] ${stepData.name}</span>
         <div style="color:#cbd5e1; font-size:0.8rem; margin-top:2px;">↳ ${escapeHtml(stepData.details)}</div>
     </div>
     `;
@@ -213,44 +375,44 @@ function renderCompletedInvestigation(invData) {
     container.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h3 style="color:#f8fafc; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
-            🛡️ AI Threat Investigation Report
+            ${t('investigationTitle')}
         </h3>
-        <span class="pulse-badge badge-critical">${inv.risk_level || 'CRITICAL'} (Confidence: ${inv.confidence_score || 95}%)</span>
+        <span class="pulse-badge badge-critical">${inv.risk_level || 'CRÍTICO'} (Confiança: ${inv.confidence_score || 95}%)</span>
     </div>
     
     <!-- Threat Intel Metrics -->
     <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:14px;">
         <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; border:1px solid rgba(239,68,68,0.2);">
-            <div style="font-size:0.7rem; color:var(--text-muted);">VirusTotal Score</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">${t('vtScore')}</div>
             <div style="font-size:1.1rem; font-weight:700; color:#ef4444; font-family:var(--font-mono);">${ti.vt_score || '0/91'}</div>
         </div>
         <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; border:1px solid rgba(245,158,11,0.2);">
-            <div style="font-size:0.7rem; color:var(--text-muted);">AbuseIPDB Score</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">${t('abuseScore')}</div>
             <div style="font-size:1.1rem; font-weight:700; color:#f59e0b; font-family:var(--font-mono);">${ti.abuseipdb_score || 0}%</div>
         </div>
         <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; border:1px solid rgba(56,189,248,0.2);">
-            <div style="font-size:0.7rem; color:var(--text-muted);">Geo Origin</div>
-            <div style="font-size:1.1rem; font-weight:700; color:#38bdf8; font-family:var(--font-mono);">${ti.abuseipdb_country || 'Unknown'}</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">${t('geoOrigin')}</div>
+            <div style="font-size:1.1rem; font-weight:700; color:#38bdf8; font-family:var(--font-mono);">${ti.abuseipdb_country || 'Desconhecido'}</div>
         </div>
         <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; border:1px solid rgba(168,85,247,0.2);">
-            <div style="font-size:0.7rem; color:var(--text-muted);">Tor Exit Node</div>
-            <div style="font-size:1.1rem; font-weight:700; color:#a855f7; font-family:var(--font-mono);">${ti.is_tor_exit ? 'YES' : 'NO'}</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">${t('torExit')}</div>
+            <div style="font-size:1.1rem; font-weight:700; color:#a855f7; font-family:var(--font-mono);">${ti.is_tor_exit ? 'SIM' : 'NÃO'}</div>
         </div>
     </div>
     
     <!-- AI Structured Report -->
     <div style="background:#060911; padding:14px; border-radius:8px; font-family:var(--font-mono); font-size:0.82rem; line-height:1.6; color:#e2e8f0; margin-bottom:14px; white-space:pre-wrap; border:1px solid rgba(56,189,248,0.25);">
-${escapeHtml(inv.ai_summary || 'No AI summary available')}
+${escapeHtml(inv.ai_summary || 'Nenhum relatório de IA disponível')}
     </div>
     
     <!-- Actions Bar -->
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div style="font-size:0.78rem; color:var(--text-muted);">
-            Attacker IP: <code style="color:#38bdf8;">${alert.source_ip || ti.source_ip}</code>
+            IP Atacante: <code style="color:#38bdf8;">${alert.source_ip || ti.source_ip}</code>
         </div>
         <div style="display:flex; gap:8px;">
             <button class="btn-cyber btn-danger" onclick="executeFirewallBlock('${alert.source_ip || ti.source_ip}')">
-                🚫 Block IP (Firewall Drop)
+                ${t('btnBlockIp')}
             </button>
         </div>
     </div>
@@ -289,37 +451,36 @@ async function loadInvestigations() {
 async function executeFirewallBlock(ip) {
     if (!ip) return;
     try {
-        const res = await fetch('/api/containment/block', {
+        await fetch('/api/containment/block', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 source_ip: ip,
-                reason: `Manual analyst containment from SOC Admin Console for ${ip}`,
+                reason: `Contenção manual disparada pelo analista no Console SOC para ${ip}`,
                 executed_by: 'ANALYST_HUMAN'
             })
         });
-        const data = await res.json();
-        showToast(`✅ IP ${ip} successfully blocked in Firewall & AWS SG!`, 'emerald');
+        showToast(t('toastBlocked'), 'emerald');
         loadContainmentBlocks();
         loadMetrics();
     } catch (e) {
-        showToast(`❌ Failed to block IP: ${e}`, 'crimson');
+        showToast(`❌ Falha: ${e}`, 'crimson');
     }
 }
 
 // Execute Firewall Unblock
 async function executeFirewallUnblock(ip) {
     try {
-        const res = await fetch('/api/containment/unblock', {
+        await fetch('/api/containment/unblock', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ source_ip: ip, executed_by: 'ANALYST_HUMAN' })
         });
-        showToast(`ℹ️ IP ${ip} unblocked`, 'cyan');
+        showToast(`ℹ️ IP ${ip} desbloqueado`, 'cyan');
         loadContainmentBlocks();
         loadMetrics();
     } catch (e) {
-        showToast(`❌ Failed to unblock IP: ${e}`, 'crimson');
+        showToast(`❌ Falha: ${e}`, 'crimson');
     }
 }
 
@@ -334,14 +495,14 @@ async function loadContainmentBlocks() {
         tbody.innerHTML = blocks.map(b => `
             <tr style="border-bottom:1px solid rgba(56,189,248,0.1); font-size:0.85rem;">
                 <td style="padding:10px; font-family:var(--font-mono); color:#38bdf8;">${b.source_ip}</td>
-                <td style="padding:10px;"><span class="pulse-badge ${b.status === 'ACTIVE' ? 'badge-high' : 'badge-low'}">${b.status}</span></td>
+                <td style="padding:10px;"><span class="pulse-badge ${b.status === 'ACTIVE' ? 'badge-high' : 'badge-low'}">${b.status === 'ACTIVE' ? 'ATIVO' : 'REVOGADO'}</span></td>
                 <td style="padding:10px; color:#cbd5e1;">${escapeHtml(b.reason || '')}</td>
                 <td style="padding:10px; font-family:var(--font-mono); color:var(--text-muted);">${b.executed_by}</td>
                 <td style="padding:10px; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">${formatTime(b.timestamp)}</td>
                 <td style="padding:10px;">
                     ${b.status === 'ACTIVE' ? `
-                        <button class="btn-cyber" style="padding:4px 8px; font-size:0.75rem;" onclick="executeFirewallUnblock('${b.source_ip}')">Unblock</button>
-                    ` : '<span style="color:var(--text-muted);">Revoked</span>'}
+                        <button class="btn-cyber" style="padding:4px 8px; font-size:0.75rem;" onclick="executeFirewallUnblock('${b.source_ip}')">${t('btnUnblock')}</button>
+                    ` : `<span style="color:var(--text-muted);">${t('revoked')}</span>`}
                 </td>
             </tr>
         `).join('');
@@ -362,7 +523,7 @@ async function loadMitreMatrix() {
             <div class="glass-panel" style="padding:16px; border-left: 4px solid ${m.active ? '#10b981' : 'rgba(255,255,255,0.1)'};">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <span style="font-family:var(--font-mono); font-weight:700; color:#38bdf8;">${m.id}</span>
-                    <span class="pulse-badge ${m.count > 0 ? 'badge-high' : 'badge-low'}">${m.count} Alerts</span>
+                    <span class="pulse-badge ${m.count > 0 ? 'badge-high' : 'badge-low'}">${m.count} Alertas</span>
                 </div>
                 <div style="font-weight:600; font-size:0.95rem; margin-bottom:4px;">${m.name}</div>
                 <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">${m.tactic}</div>
@@ -410,17 +571,22 @@ async function saveSettings() {
                 abuseipdb_api_key: abuseKey || undefined
             })
         });
-        showToast('✅ Settings saved successfully!', 'emerald');
+        showToast(t('toastSaved'), 'emerald');
         toggleModal('settings-modal', false);
         loadSettings();
     } catch (e) {
-        showToast(`❌ Failed to save settings: ${e}`, 'crimson');
+        showToast(`❌ Falha: ${e}`, 'crimson');
     }
 }
 
 function toggleModal(modalId, show) {
     const el = document.getElementById(modalId);
     if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+function toggleLanguage() {
+    const newLang = currentLang === 'pt' ? 'en' : 'pt';
+    setLanguage(newLang);
 }
 
 // Helpers

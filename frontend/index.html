@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,19 +43,22 @@
                         HYBRID AGENTIC SOC
                         <span style="font-size:0.7rem; background:rgba(56,189,248,0.2); color:#38bdf8; padding:2px 6px; border-radius:4px;">ENTERPRISE v2.0</span>
                     </h1>
-                    <div style="font-size:0.75rem; color:var(--text-muted);">Deterministic Rule Engine + Autonomous AI Investigation Core</div>
+                    <div data-i18n="subtitle" style="font-size:0.75rem; color:var(--text-muted);">Motor de Regras Determinístico + Núcleo de Investigação Autônomo com IA</div>
                 </div>
             </div>
 
-            <div style="display:flex; align-items:center; gap:14px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button id="btn-lang-toggle" class="btn-cyber" style="border-color:rgba(245,158,11,0.4); color:#f59e0b; padding:6px 12px;" onclick="toggleLanguage()">
+                    🇧🇷 PT-BR
+                </button>
                 <div id="ws-status" class="pulse-badge badge-low">
-                    <span class="pulse-dot" style="background:#10b981;"></span> ORCHESTRATOR LIVE
+                    <span class="pulse-dot" style="background:#10b981;"></span> <span data-i18n="orchestratorLive">ORQUESTRADOR ONLINE</span>
                 </div>
                 <div class="pulse-badge badge-low" style="border-color:rgba(168,85,247,0.3); color:#c084fc;">
-                    AI ENGINE: <b id="active-llm-badge" style="margin-left:4px;">DEMO / OLLAMA</b>
+                    <span data-i18n="aiEngine">MOTOR DE IA</span>: <b id="active-llm-badge" style="margin-left:4px;">DEMO / OLLAMA</b>
                 </div>
                 <button class="btn-cyber" onclick="toggleModal('settings-modal', true)">
-                    ⚙️ Settings
+                    <span data-i18n="settings">⚙️ Configurações</span>
                 </button>
             </div>
         </div>
@@ -66,34 +69,34 @@
         <!-- Metrics Overview Wallboard -->
         <section style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:16px; margin-bottom:20px;">
             <div class="glass-panel metric-card">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Total Ingested Alerts</div>
+                <div data-i18n="metricTotal" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Total de Alertas Ingeridos</div>
                 <div id="metric-total" class="metric-value" style="color:#f8fafc;">0</div>
-                <div style="font-size:0.72rem; color:var(--accent-cyan);">SIEM & Syslog stream</div>
+                <div data-i18n="metricTotalSub" style="font-size:0.72rem; color:var(--accent-cyan);">Fluxo SIEM & Syslog</div>
             </div>
             <div class="glass-panel metric-card">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Low Auto-Triaged (90%)</div>
+                <div data-i18n="metricLow" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Baixo Risco Auto-Triado (90%)</div>
                 <div id="metric-low" class="metric-value" style="color:#10b981;">0</div>
-                <div style="font-size:0.72rem; color:#10b981;">Auto-closed / 0 Analyst Fatigue</div>
+                <div data-i18n="metricLowSub" style="font-size:0.72rem; color:#10b981;">Auto-fechado / 0 Fadiga de Alertas</div>
             </div>
             <div class="glass-panel metric-card">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">High AI Investigated (10%)</div>
+                <div data-i18n="metricHigh" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Alto Risco Investigado por IA (10%)</div>
                 <div id="metric-high" class="metric-value" style="color:#ef4444;">0</div>
-                <div style="font-size:0.72rem; color:#ef4444;">Deep Multi-Agent Analysis</div>
+                <div data-i18n="metricHighSub" style="font-size:0.72rem; color:#ef4444;">Análise Profunda Multi-Agente</div>
             </div>
             <div class="glass-panel metric-card">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Mean Time to Triage (MTTR)</div>
+                <div data-i18n="metricMttr" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Tempo Médio de Resposta (MTTR)</div>
                 <div id="metric-mttr" class="metric-value" style="color:#38bdf8;">3.4s</div>
-                <div style="font-size:0.72rem; color:var(--text-muted);">vs 35 min human average</div>
+                <div data-i18n="metricMttrSub" style="font-size:0.72rem; color:var(--text-muted);">vs 35 min da média humana</div>
             </div>
             <div class="glass-panel metric-card">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Active Firewall Blocks</div>
+                <div data-i18n="metricBlocks" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Bloqueios Ativos de Firewall</div>
                 <div id="metric-blocks" class="metric-value" style="color:#a855f7;">0</div>
-                <div style="font-size:0.72rem; color:#a855f7;">Automated / Analyst approved</div>
+                <div data-i18n="metricBlocksSub" style="font-size:0.72rem; color:#a855f7;">Automatizado / Aprovado por Analista</div>
             </div>
             <div class="glass-panel metric-card">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Estimated Cost Savings</div>
+                <div data-i18n="metricSavings" style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Economia de Custos Estimada</div>
                 <div id="metric-savings" class="metric-value" style="color:#f59e0b;">$0</div>
-                <div style="font-size:0.72rem; color:#f59e0b;">SOC Analyst hours automated</div>
+                <div data-i18n="metricSavingsSub" style="font-size:0.72rem; color:#f59e0b;">Horas de analista automatizadas</div>
             </div>
         </section>
 
@@ -101,28 +104,28 @@
         <section class="glass-panel" style="padding:16px 20px; margin-bottom:20px; border:1px solid rgba(245,158,11,0.3); background:rgba(15,23,42,0.85);">
             <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px;">
                 <div>
-                    <div style="font-weight:700; font-size:0.95rem; color:#f59e0b; display:flex; align-items:center; gap:8px;">
-                        ⚡ 1-Click Live Attack Simulator (Demo Mode)
+                    <div data-i18n="simTitle" style="font-weight:700; font-size:0.95rem; color:#f59e0b; display:flex; align-items:center; gap:8px;">
+                        ⚡ Simulador de Ataques 1-Clique (Modo Demo)
                     </div>
-                    <div style="font-size:0.75rem; color:var(--text-muted);">
-                        Trigger realistic MITRE ATT&CK telemetry to test and demonstrate the autonomous agent workflow in real-time.
+                    <div data-i18n="simSub" style="font-size:0.75rem; color:var(--text-muted);">
+                        Dispare telemetria real do MITRE ATT&CK para testar e demonstrar o fluxo agêntico ao vivo.
                     </div>
                 </div>
                 <div style="display:flex; flex-wrap:wrap; gap:8px;">
                     <button class="btn-cyber btn-danger" onclick="triggerAttack('ssh_brute_force')">
-                        🔥 T1110 SSH Brute Force
+                        <span data-i18n="btnSsh">🔥 T1110 Força Bruta SSH</span>
                     </button>
                     <button class="btn-cyber" style="border-color:#f59e0b; color:#f59e0b;" onclick="triggerAttack('privilege_escalation')">
-                        👤 T1136 Rogue Sudo User
+                        <span data-i18n="btnSudo">👤 T1136 Usuário Sudo Indevido</span>
                     </button>
                     <button class="btn-cyber" style="border-color:#a855f7; color:#c084fc;" onclick="triggerAttack('web_sqli_exploit')">
-                        🌐 T1190 Web SQLi Exploit
+                        <span data-i18n="btnSqli">🌐 T1190 Exploit Web SQLi</span>
                     </button>
                     <button class="btn-cyber btn-danger" onclick="triggerAttack('fim_ransomware')">
-                        ⚠️ T1486 Ransomware FIM
+                        <span data-i18n="btnRansom">⚠️ T1486 Ransomware FIM</span>
                     </button>
                     <button class="btn-cyber" style="border-color:#10b981; color:#10b981;" onclick="triggerAttack('recon_port_scan')">
-                        🔍 T1046 Port Scan (Low)
+                        <span data-i18n="btnScan">🔍 T1046 Varredura de Portas (Baixo)</span>
                     </button>
                 </div>
             </div>
@@ -130,9 +133,15 @@
 
         <!-- Main Navigation Tabs -->
         <nav style="display:flex; gap:8px; border-bottom:1px solid var(--border-color); margin-bottom:20px;">
-            <button id="btn-tab-operations" class="nav-tab active-tab" onclick="switchTab('operations')">🚨 Live SOC Operations</button>
-            <button id="btn-tab-mitre" class="nav-tab" onclick="switchTab('mitre')">📊 MITRE ATT&CK Matrix</button>
-            <button id="btn-tab-containment" class="nav-tab" onclick="switchTab('containment')">🛡️ Active Containment & Firewall</button>
+            <button id="btn-tab-operations" class="nav-tab active-tab" onclick="switchTab('operations')">
+                <span data-i18n="tabOps">🚨 Operações do SOC ao Vivo</span>
+            </button>
+            <button id="btn-tab-mitre" class="nav-tab" onclick="switchTab('mitre')">
+                <span data-i18n="tabMitre">📊 Matriz MITRE ATT&CK</span>
+            </button>
+            <button id="btn-tab-containment" class="nav-tab" onclick="switchTab('containment')">
+                <span data-i18n="tabContainment">🛡️ Contenção Ativa & Firewall</span>
+            </button>
         </nav>
 
         <!-- Tab 1: Live Operations -->
@@ -143,9 +152,11 @@
                 <div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <h2 style="font-size:1rem; font-weight:700; color:#e2e8f0; display:flex; align-items:center; gap:8px;">
-                            📡 Live Telemetry & Alert Stream
+                            <span data-i18n="telemetryStream">📡 Fluxo de Telemetria & Alertas ao Vivo</span>
                         </h2>
-                        <button class="btn-cyber" style="padding:4px 10px; font-size:0.75rem;" onclick="loadAlerts()">↻ Refresh</button>
+                        <button class="btn-cyber" style="padding:4px 10px; font-size:0.75rem;" onclick="loadAlerts()">
+                            <span data-i18n="refresh">↻ Atualizar</span>
+                        </button>
                     </div>
                     <div id="alerts-container" style="max-height:720px; overflow-y:auto; padding-right:4px;">
                         <!-- Alert cards injected here -->
@@ -158,20 +169,20 @@
                     <div class="glass-panel" style="padding:16px; margin-bottom:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <h3 style="font-size:0.9rem; font-weight:700; color:#38bdf8; display:flex; align-items:center; gap:8px;">
-                                🧠 AI Agent Orchestrator & Reasoning Stream
+                                <span data-i18n="aiReasoningStream">🧠 Orquestrador & Raciocínio da IA em Tempo Real</span>
                             </h3>
-                            <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--text-muted);">Real-time Telemetry</span>
+                            <span data-i18n="realtimeTelemetry" style="font-size:0.75rem; font-family:var(--font-mono); color:var(--text-muted);">Telemetria em Tempo Real</span>
                         </div>
                         <div id="agent-reasoning-terminal" class="terminal-window">
-                            <div style="color:var(--accent-emerald);">[SYSTEM] Autonomous Agent Orchestrator initialized. Waiting for incoming telemetry...</div>
-                            <div style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">Click any simulation button above to watch the agent triage and investigate in real-time.</div>
+                            <div data-i18n="aiInitMessage" style="color:var(--accent-emerald);">[SISTEMA] Orquestrador de Agentes Autônomos inicializado. Aguardando telemetria...</div>
+                            <div data-i18n="aiInitSub" style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">Clique em qualquer botão de simulação acima para ver a IA triando e investigando ao vivo.</div>
                         </div>
                     </div>
 
                     <!-- Completed Investigation Report View -->
                     <div id="investigation-details-card" class="glass-panel" style="padding:18px;">
-                        <div style="color:var(--text-muted); text-align:center; padding:40px 0;">
-                            Select an investigated alert or trigger a simulation to inspect the generated report.
+                        <div data-i18n="selectAlertPlaceholder" style="color:var(--text-muted); text-align:center; padding:40px 0;">
+                            Selecione um alerta investigado ou dispare uma simulação para inspecionar o relatório gerado.
                         </div>
                     </div>
                 </div>
@@ -182,8 +193,8 @@
         <!-- Tab 2: MITRE Matrix -->
         <div id="tab-mitre" class="tab-content" style="display:none;">
             <div style="margin-bottom:16px;">
-                <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">MITRE ATT&CK® Detection Coverage Heatmap</h2>
-                <p style="font-size:0.8rem; color:var(--text-muted);">Mapping active SIEM detection rules and autonomous containment playbooks across adversary tactics.</p>
+                <h2 data-i18n="mitreTitle" style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">Mapa de Calor de Cobertura de Detecção MITRE ATT&CK®</h2>
+                <p data-i18n="mitreSub" style="font-size:0.8rem; color:var(--text-muted);">Mapeamento das regras de detecção ativas do SIEM e playbooks de contenção autônoma por tática adversária.</p>
             </div>
             <div id="mitre-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
                 <!-- MITRE cards injected here -->
@@ -195,21 +206,23 @@
             <div class="glass-panel" style="padding:20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                     <div>
-                        <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">🛡️ Perimeter Firewall & Containment Actions</h2>
-                        <p style="font-size:0.8rem; color:var(--text-muted);">Active drops, host isolation, and human-in-the-loop audit log.</p>
+                        <h2 data-i18n="containmentTitle" style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">🛡️ Firewall Perimetral & Ações de Contenção</h2>
+                        <p data-i18n="containmentSub" style="font-size:0.8rem; color:var(--text-muted);">Bloqueios ativos, isolamento de hosts e log de auditoria Human-in-the-Loop.</p>
                     </div>
-                    <button class="btn-cyber" onclick="loadContainmentBlocks()">↻ Refresh Blocks</button>
+                    <button class="btn-cyber" onclick="loadContainmentBlocks()">
+                        <span data-i18n="refresh">↻ Atualizar</span>
+                    </button>
                 </div>
                 
                 <table style="width:100%; border-collapse:collapse; text-align:left;">
                     <thead>
                         <tr style="border-bottom:1px solid rgba(56,189,248,0.2); font-size:0.78rem; text-transform:uppercase; color:var(--text-muted);">
-                            <th style="padding:10px;">Target IP</th>
-                            <th style="padding:10px;">Status</th>
-                            <th style="padding:10px;">Reason</th>
-                            <th style="padding:10px;">Executed By</th>
-                            <th style="padding:10px;">Timestamp</th>
-                            <th style="padding:10px;">Action</th>
+                            <th data-i18n="colIp" style="padding:10px;">IP Alvo</th>
+                            <th data-i18n="colStatus" style="padding:10px;">Status</th>
+                            <th data-i18n="colReason" style="padding:10px;">Motivo</th>
+                            <th data-i18n="colBy" style="padding:10px;">Executado Por</th>
+                            <th data-i18n="colTime" style="padding:10px;">Horário</th>
+                            <th data-i18n="colAction" style="padding:10px;">Ação</th>
                         </tr>
                     </thead>
                     <tbody id="containment-tbody">
@@ -225,45 +238,49 @@
     <div id="settings-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
         <div class="glass-panel" style="max-width:560px; width:90%; padding:24px; background:#0f172a;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h3 style="font-size:1.1rem; font-weight:700;">⚙️ SOC Settings & AI Provider</h3>
+                <h3 data-i18n="modalTitle" style="font-size:1.1rem; font-weight:700;">⚙️ Configurações do SOC & Provedores de IA</h3>
                 <button class="btn-cyber" style="padding:4px 8px;" onclick="toggleModal('settings-modal', false)">✕</button>
             </div>
             
             <div style="display:flex; flex-direction:column; gap:14px; font-size:0.85rem;">
                 <div>
-                    <label style="font-weight:600; display:block; margin-bottom:6px;">LLM Reasoning Engine</label>
+                    <label data-i18n="lblProvider" style="font-weight:600; display:block; margin-bottom:6px;">Motor de Raciocínio LLM</label>
                     <select id="setting-llm-provider" style="width:100%; padding:8px 12px; background:#090d16; border:1px solid rgba(56,189,248,0.3); border-radius:6px; color:#fff;">
-                        <option value="demo">Demo / Offline Intelligent Mode (Free & Instant)</option>
-                        <option value="gemini">Google Gemini (API Key required)</option>
+                        <option value="demo">Demo / Modo Inteligente Offline (Gratuito e Instantâneo)</option>
+                        <option value="gemini">Google Gemini (Requer chave de API)</option>
                         <option value="ollama">Ollama Local (Mistral 7B / Llama 3)</option>
-                        <option value="openai">OpenAI GPT-4o (API Key required)</option>
+                        <option value="openai">OpenAI GPT-4o (Requer chave de API)</option>
                     </select>
                 </div>
                 
                 <div>
-                    <label style="font-weight:600; display:block; margin-bottom:6px;">Gemini API Key (Optional)</label>
+                    <label data-i18n="lblGemini" style="font-weight:600; display:block; margin-bottom:6px;">Chave de API do Gemini (Opcional)</label>
                     <input type="password" id="setting-gemini-key" placeholder="AIzaSy..." style="width:100%; padding:8px 12px; background:#090d16; border:1px solid rgba(56,189,248,0.3); border-radius:6px; color:#fff;">
                 </div>
 
                 <div>
-                    <label style="font-weight:600; display:block; margin-bottom:6px;">VirusTotal API Key (Optional)</label>
-                    <input type="password" id="setting-vt-key" placeholder="Free API key..." style="width:100%; padding:8px 12px; background:#090d16; border:1px solid rgba(56,189,248,0.3); border-radius:6px; color:#fff;">
+                    <label data-i18n="lblVt" style="font-weight:600; display:block; margin-bottom:6px;">Chave de API do VirusTotal (Opcional)</label>
+                    <input type="password" id="setting-vt-key" placeholder="Chave gratuita..." style="width:100%; padding:8px 12px; background:#090d16; border:1px solid rgba(56,189,248,0.3); border-radius:6px; color:#fff;">
                 </div>
 
                 <div>
-                    <label style="font-weight:600; display:block; margin-bottom:6px;">AbuseIPDB API Key (Optional)</label>
-                    <input type="password" id="setting-abuse-key" placeholder="Free API key..." style="width:100%; padding:8px 12px; background:#090d16; border:1px solid rgba(56,189,248,0.3); border-radius:6px; color:#fff;">
+                    <label data-i18n="lblAbuse" style="font-weight:600; display:block; margin-bottom:6px;">Chave de API do AbuseIPDB (Opcional)</label>
+                    <input type="password" id="setting-abuse-key" placeholder="Chave gratuita..." style="width:100%; padding:8px 12px; background:#090d16; border:1px solid rgba(56,189,248,0.3); border-radius:6px; color:#fff;">
                 </div>
 
                 <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
                     <input type="checkbox" id="setting-auto-containment" style="width:16px; height:16px;">
-                    <label for="setting-auto-containment" style="font-weight:600;">Enable Autonomous Containment (Auto-Block Critical IPs)</label>
+                    <label for="setting-auto-containment" data-i18n="lblAuto" style="font-weight:600;">Habilitar Contenção Autônoma (Auto-bloquear IPs Críticos)</label>
                 </div>
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                <button class="btn-cyber" onclick="toggleModal('settings-modal', false)">Cancel</button>
-                <button class="btn-cyber btn-success" onclick="saveSettings()">Save Configuration</button>
+                <button class="btn-cyber" onclick="toggleModal('settings-modal', false)">
+                    <span data-i18n="btnCancel">Cancelar</span>
+                </button>
+                <button class="btn-cyber btn-success" onclick="saveSettings()">
+                    <span data-i18n="btnSave">Salvar Configurações</span>
+                </button>
             </div>
         </div>
     </div>
