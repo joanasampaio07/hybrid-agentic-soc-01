@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  soc-platform:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hybrid-agentic-soc
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_PROVIDER=demo
+      - AUTO_CONTAINMENT_ENABLED=false
+    volumes:
+      - ./backend/data:/app/data
+      - ./frontend:/app/frontend
+    restart: unless-stopped
