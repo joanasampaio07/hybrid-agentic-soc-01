@@ -91,8 +91,8 @@ Test and demo the entire pipeline with 1 click:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/YOUR_USER/hybrid-agentic-soc.git
-   cd hybrid-agentic-soc/backend
+   git clone https://github.com/joanasampaio07/hybrid-agentic-soc-01.git
+   cd hybrid-agentic-soc-01/backend
    ```
 
 2. **Install dependencies**:
